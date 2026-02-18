@@ -15,7 +15,7 @@
         <div class="logo" aria-hidden="true">◎</div>
         <div>
           <h1>Tools Link Gambar</h1>
-          <p>Generate link dari judul + susun link gambar berurutan (1–N) langsung di browser.</p>
+          <p>Generate link dari judul + susun link gambar berurutan (1–10) langsung di browser.</p>
         </div>
       </div>
 
@@ -81,7 +81,7 @@
       <section class="card">
         <div class="card-head">
           <h2>3) Link Gambar</h2>
-          <span class="pill">3 Box</span>
+          <span class="pill">4 Box</span>
         </div>
 
         <div class="three">
@@ -93,7 +93,7 @@
           <div class="field">
             <label>Box 2: Nama File (tanpa nomor)</label>
             <input id="imgBaseName" placeholder="mahjongways-gameko" />
-            <div class="help">Nomor 1–N akan ditambahkan otomatis.</div>
+            <div class="help">Nomor 1–N akan ditambahkan otomatis sesuai jumlah.</div>
           </div>
           <div class="field">
             <label>Box 3: Format</label>
@@ -101,9 +101,9 @@
             <div class="help">Contoh: <code>.webp</code>, <code>.jpg</code>, <code>.png</code></div>
           </div>
           <div class="field">
-            <label>Jumlah Link</label>
-            <input id="imgCount" type="number" min="1" max="500" step="1" value="10" />
-            <div class="help">Atur kebutuhanmu. Contoh: 50 (maks 500).</div>
+            <label>Box 4: Jumlah Link</label>
+            <input id="imgCount" type="number" inputmode="numeric" min="1" max="5000" value="10" placeholder="10" />
+            <div class="help">Masukkan jumlah link yang ingin dibuat (mis. 20, 50, 100).</div>
           </div>
         </div>
 
@@ -112,7 +112,7 @@
           <button id="btnReset" class="btn danger" type="button">Reset</button>
         </div>
 
-        <div id="imgStatus" class="status idle" style="margin-top:12px;">Isi 3 box → klik Generate.</div>
+        <div id="imgStatus" class="status idle" style="margin-top:12px;">Isi box → klik Generate.</div>
       </section>
 
       <section class="card">
@@ -122,7 +122,7 @@
         </div>
 
         <div class="field">
-          <label>Hasil Link Gambar</label>
+          <label>Hasil Link Gambar (10 baris)</label>
           <textarea id="out" placeholder="Hasil akan muncul di sini"></textarea>
           <div class="actions" style="margin-top:8px;">
             <button class="btn" id="btnCopy" type="button">Copy Hasil</button>

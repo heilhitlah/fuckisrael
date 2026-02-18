@@ -296,6 +296,7 @@
   const KEY_DOMAIN = "runa_img_domain";
   const KEY_BASE = "runa_img_base";
   const KEY_EXT = "runa_img_ext";
+  const KEY_COUNT = "runa_img_count";
 
   const KEY_LINK_DOMAIN = "runa_link_domain";
   const KEY_LINK_TITLES = "runa_link_titles";
@@ -304,9 +305,11 @@
     const d = localStorage.getItem(KEY_DOMAIN);
     const b = localStorage.getItem(KEY_BASE);
     const e = localStorage.getItem(KEY_EXT);
+    const c = localStorage.getItem(KEY_COUNT);
     if(d && getEl("imgDomain")) getEl("imgDomain").value = d;
     if(b && getEl("imgBaseName")) getEl("imgBaseName").value = b;
     if(e && getEl("imgExt")) getEl("imgExt").value = e;
+    if(getEl("imgCount")) getEl("imgCount").value = (c && String(c).trim()) ? c : (getEl("imgCount").value || "10");
 
     const ld = localStorage.getItem(KEY_LINK_DOMAIN);
     const lt = localStorage.getItem(KEY_LINK_TITLES);
@@ -318,6 +321,7 @@
     if(getEl("imgDomain")) localStorage.setItem(KEY_DOMAIN, getEl("imgDomain").value || "");
     if(getEl("imgBaseName")) localStorage.setItem(KEY_BASE, getEl("imgBaseName").value || "");
     if(getEl("imgExt")) localStorage.setItem(KEY_EXT, getEl("imgExt").value || "");
+    if(getEl("imgCount")) localStorage.setItem(KEY_COUNT, getEl("imgCount").value || "10");
 
     if(getEl("linkDomain")) localStorage.setItem(KEY_LINK_DOMAIN, getEl("linkDomain").value || "");
     if(getEl("linkTitles")) localStorage.setItem(KEY_LINK_TITLES, getEl("linkTitles").value || "");
@@ -414,11 +418,6 @@
     const base = String(getEl("imgBaseName")?.value || "").trim();
     const ext = String(getEl("imgExt")?.value || "").trim();
 
-    const rawCount = String(getEl("imgCount")?.value || "10").trim();
-    let count = parseInt(rawCount, 10);
-    if(!Number.isFinite(count) || count < 1) count = 10;
-    if(count > 500) count = 500;
-
     if(!domain || !base || !ext){
       setStatus("bad", "ERROR: Semua box wajib diisi (domain, nama file, format)." );
       return;
@@ -427,35 +426,28 @@
     saveNow();
 
     const out = [];
+    const countRaw = getEl("imgCount") ? getEl("imgCount").value : "10";
+    const count = Math.max(1, Math.min(5000, parseInt(countRaw, 10) || 10));
+    if(getEl("imgCount")) getEl("imgCount").value = String(count);
     for(let i=1; i<=count; i++){
       out.push(`${domain}${base}${i}${ext}`);
     }
     if(getEl("out")) getEl("out").value = out.join("\n");
-    setStatus("ok", `Sukses: ${count} link dibuat. Klik Copy Hasil.`);
+    setStatus("ok", `Sukses: ${out.length} link dibuat. Klik Copy Hasil.`);
   };
 
-  
-  const updateGenerateLabel = () => {
-    const btn = getEl("btnGenerate");
-    if(!btn) return;
-    const raw = String(getEl("imgCount")?.value || "10").trim();
-    let n = parseInt(raw, 10);
-    if(!Number.isFinite(n) || n < 1) n = 10;
-    if(n > 500) n = 500;
-    btn.textContent = `Generate ${n} Link`;
-  };
-
-getEl("btnGenerate")?.addEventListener("click", generate);
-  getEl("imgCount")?.addEventListener("input", updateGenerateLabel);
+  getEl("btnGenerate")?.addEventListener("click", generate);
 
   getEl("btnReset")?.addEventListener("click", () => {
     if(getEl("imgDomain")) getEl("imgDomain").value = "";
     if(getEl("imgBaseName")) getEl("imgBaseName").value = "";
     if(getEl("imgExt")) getEl("imgExt").value = "";
+    if(getEl("imgCount")) getEl("imgCount").value = "10";
     if(getEl("out")) getEl("out").value = "";
     localStorage.removeItem(KEY_DOMAIN);
     localStorage.removeItem(KEY_BASE);
     localStorage.removeItem(KEY_EXT);
+    localStorage.removeItem(KEY_COUNT);
     setStatus("idle", "Reset selesai.");
   });
 
@@ -466,7 +458,6 @@ getEl("btnGenerate")?.addEventListener("click", generate);
   });
 
   loadSaved();
-  updateGenerateLabel();
-  setStatus("idle", "Isi 4 box → klik Generate.");
+  setStatus("idle", "Isi box → klik Generate.");
   if(getEl("linkStatus")) setLinkStatus("idle", "Isi domain + judul → generate.");
 })();
