@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Placeholder Generator • GitHub Pages</title>
+  <link rel="stylesheet" href="./style.css" />
+  <!-- JSZip + FileSaver (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">◎</div>
+        <div>
+          <h1>Placeholder Generator</h1>
+          <p>Buat banyak file HTML dari 1 template, lalu download ZIP.</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <a class="btn ghost" href="./anchor.html" style="text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;">Tools Anchor, Link &amp; Gambar</a>
+        <button id="btnLoadSample" class="btn ghost" type="button">Isi Contoh</button>
+        <button id="btnReset" class="btn danger" type="button">Reset</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card template-card">
+        <div class="card-head">
+          <h2>1) Template</h2>
+          <span class="pill">Fleksibel</span>
+        </div>
+
+        <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload template">
+          <input id="templateFile" type="file" accept=".html,.htm,text/html" />
+          <div class="dz-inner">
+            <div class="dz-icn" aria-hidden="true">⬆</div>
+            <div>
+              <div class="dz-title">Drag & drop template di sini</div>
+              <div class="dz-sub">atau klik untuk memilih file <span class="kbd">.html</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="help">Template: <span id="tplMeta">Belum dimuat</span></div>
+
+        <div class="three">
+          <div class="field">
+            <label>Placeholder Judul</label>
+            <input id="phTitle" value="*JUDUL*" />
+          </div>
+          <div class="field">
+            <label>Placeholder Link</label>
+            <input id="phLink" value="*LINK*" />
+          </div>
+          <div class="field">
+            <label>Placeholder Gambar</label>
+            <input id="phImg" value="*GAMBAR*" />
+          </div>
+          <div class="field">
+            <label>Placeholder Artikel</label>
+            <input id="phArticle" value="*ARTIKEL*" />
+          </div>
+        </div>
+      </section>
+
+      <section class="card data-card">
+        <div class="card-head">
+          <h2>2) Data</h2>
+          <span class="pill">Satu per baris</span>
+        </div>
+
+        <div class="stack">
+          <div class="field">
+            <label>JUDUL</label>
+            <textarea id="titles" placeholder="1 judul per baris"></textarea>
+          </div>
+          <div class="field">
+            <label>LINK</label>
+            <textarea id="links" placeholder="1 link per baris"></textarea>
+          </div>
+          <div class="field">
+            <label>GAMBAR</label>
+            <textarea id="images" placeholder="1 gambar per baris"></textarea>
+          </div>
+
+          <div class="field">
+            <label>ARTIKEL (blok panjang)</label>
+            <textarea id="articles" placeholder="Tempel artikel di sini (pakai marker -###- dan -$$$-) atau upload file di bawah"></textarea>
+            <input id="articleFile" type="file" accept=".txt,.md,.html,.htm,text/plain,text/markdown,text/html" />
+            <div class="help">Upload <code>artikel.txt</code> berisi banyak blok artikel. Mapping berdasarkan urutan (blok #1 untuk judul baris #1, dst).</div>
+          </div>
+
+        <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload template">
+          <div class="field">
+            <label>Upload Gambar (opsional)</label>
+            <input id="imageFiles" type="file" accept="image/*" multiple />
+              <div class="dz-inner">
+              <div class="dz-icn" aria-hidden="true">⬆</div>
+              <div>
+                <div class="dz-title">Drag & drop Gambar di sini</div>
+                <div class="dz-sub">atau klik untuk memilih file <span class="kbd">.webp</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="status" class="status idle">Belum ada proses.</div>
+        <div class="report" id="report"></div>
+
+            <div class="zip-row">
+              <div class="field">
+                <label>Nama ZIP</label>
+                <input id="zipName" value="artikel-output.zip" />
+                <div class="help">Otomatis ditambah <code>.zip</code> jika belum ada.</div>
+              </div>
+              <button id="btnGenerate" class="btn primary" type="button">Generate & Download ZIP</button>
+            </div>
+          </div>
+          
+          <details class="tips">
+            <ul>
+              <li>
+              <div class="toggle-row">
+              <div class="toggle">
+                <input id="chkStrict" type="checkbox" checked />
+                <label for="chkStrict">
+                  <div class="t-title">Strict integrity check</div>
+                  <div class="t-sub">Gagal jika ada perubahan selain placeholder.</div>
+                </label>
+              </div>
+              </li>
+              <li>
+              <div class="toggle">
+                <input id="chkNameFromLink" type="checkbox" checked />
+                <label for="chkNameFromLink">
+                  <div class="t-title">Nama file dari LINK</div>
+                  <div class="t-sub">Jika duplikat, otomatis diberi suffix.</div>
+                </label>
+              </div>
+              </li>
+              <li>
+          <div class="toggle">
+            <input id="chkAutoRefresh" type="checkbox" checked />
+              <label for="chkAutoRefresh">
+                <div class="t-title">Auto refresh setelah download</div>
+                <div class="t-sub">Mencegah double-generate/duplikat jika tombol terklik lagi.</div>
+              </label>
+            </div>
+            </li>
+          </ul>
+          </details>
+          <details class="tips">
+            <summary>Tips cepat</summary>
+            <ul>
+              <li>Kalau placeholder Anda terlalu umum (mis. <code>*LINK*</code>) dan sering bentrok, gunakan format unik seperti <code>{{LINK}}</code>.</li>
+              <li>Jika link tidak valid, nama file fallback menjadi <code>artikel.html</code>.</li>
+              <li>Preview hanya menampilkan file pertama untuk cek cepat.</li>
+            </ul>
+          </details>
+      </section>
+      <footer class="footer">
+        <span>Berjalan 100% di browser • Cocok untuk GitHub Pages • Tidak mengirim data ke server</span>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Preview modal -->
+  <dialog id="modal" class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Preview</div>
+        <div class="modal-sub" id="previewName">-</div>
+      </div>
+      <button id="btnClose" class="btn ghost" type="button">Tutup</button>
+    </div>
+    <iframe id="previewFrame" title="Preview HTML"></iframe>
+  </dialog>
+  <script src="./app.js"></script>
+</body>
+</html>
