@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Runa PRO • Bulk HTML Generator</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Runa PRO — Bulk HTML Generator</h1>
+      <div class="sub">Multi-template • CSV import • Related links • Output folder • ZIP report</div>
+    </div>
+    <div class="pill"><span>Client-side only</span> <span>•</span> <span id="buildTag">PRO</span></div>
+  </header>
+
+  <div class="wrap">
+    <div class="grid">
+      <section class="card">
+        <h2>1) Template</h2>
+        <label>Upload template (boleh lebih dari 1 untuk rotasi)</label>
+        <input id="templateFiles" type="file" accept=".html,.txt" multiple />
+        <div class="small" id="tplMeta">Belum dimuat</div>
+
+        <hr />
+
+        <h2>2) Import</h2>
+        <div class="tabs">
+          <div class="tab active" data-tab="manual">Manual</div>
+          <div class="tab" data-tab="csv">CSV</div>
+          <div class="tab" data-tab="advanced">Advanced</div>
+        </div>
+
+        <div id="tab-manual">
+          <label>Judul (1 baris = 1 item)</label>
+          <textarea id="titles" placeholder="Judul 1&#10;Judul 2"></textarea>
+
+          <label>Link (1 baris = 1 item)</label>
+          <textarea id="links" placeholder="https://domain.com/a.html&#10;https://domain.com/b.html"></textarea>
+
+          <label>Gambar (URL, 1 baris = 1 item)</label>
+          <textarea id="images" placeholder="https://domain.com/img/a.webp&#10;https://domain.com/img/b.webp"></textarea>
+
+          <label>Artikel (blok: -###- ... -$$$-)</label>
+          <textarea id="articles" placeholder="-###-&#10;&lt;p&gt;Isi...&lt;/p&gt;&#10;-$$$-"></textarea>
+
+          <div class="row">
+            <div style="flex:1">
+              <label>Upload artikel.txt (opsional)</label>
+              <input id="articleFile" type="file" accept=".txt,.html" />
+            </div>
+            <div style="flex:1">
+              <label>Upload gambar (opsional — masuk ZIP/images)</label>
+              <input id="imageFiles" type="file" multiple accept="image/*" />
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-csv" class="hidden">
+          <label>Import CSV (header: title,link,image,article,[folder],[slug],[tags])</label>
+          <input id="csvFile" type="file" accept=".csv,text/csv" />
+          <div class="small">CSV akan mengisi otomatis field internal generator (tanpa mengubah template).</div>
+          <hr />
+          <label>Preview CSV (10 baris pertama)</label>
+          <textarea id="csvPreview" readonly></textarea>
+        </div>
+
+        <div id="tab-advanced" class="hidden">
+          <h2>Placeholder</h2>
+          <div class="row">
+            <div style="flex:1">
+              <label>Placeholder Judul</label>
+              <input id="phTitle" type="text" value="*JUDUL*" />
+            </div>
+            <div style="flex:1">
+              <label>Placeholder Link</label>
+              <input id="phLink" type="text" value="*LINK*" />
+            </div>
+          </div>
+          <div class="row">
+            <div style="flex:1">
+              <label>Placeholder Gambar</label>
+              <input id="phImg" type="text" value="*GAMBAR*" />
+            </div>
+            <div style="flex:1">
+              <label>Placeholder Artikel</label>
+              <input id="phArticle" type="text" value="*ARTIKEL*" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div style="flex:1">
+              <label>Placeholder Related (opsional)</label>
+              <input id="phRelated" type="text" value="*RELATED*" />
+              <div class="small">Jika placeholder ini tidak ada di template, kamu bisa pilih “append ke artikel”.</div>
+            </div>
+          </div>
+
+          <hr />
+
+          <h2>Related / Internal Linking</h2>
+          <div class="row">
+            <div style="flex:1">
+              <label>Aktifkan related links</label>
+              <select id="relatedMode">
+                <option value="off">Off</option>
+                <option value="placeholder">Isi placeholder *RELATED*</option>
+                <option value="append">Append ke artikel</option>
+              </select>
+            </div>
+            <div style="flex:1">
+              <label>Jumlah link related per artikel</label>
+              <input id="relatedCount" type="text" value="5" />
+            </div>
+          </div>
+          <div class="row">
+            <div style="flex:1">
+              <label>Format related</label>
+              <select id="relatedFormat">
+                <option value="ul">List (&lt;ul&gt;)</option>
+                <option value="p">Paragraf (dipisah •)</option>
+              </select>
+            </div>
+            <div style="flex:1">
+              <label>Judul section (opsional)</label>
+              <input id="relatedHeading" type="text" value="Bacaan Terkait" />
+            </div>
+          </div>
+
+          <hr />
+
+          <h2>Output</h2>
+          <div class="row">
+            <div style="flex:1">
+              <label>Mode template</label>
+              <select id="templateMode">
+                <option value="single">Single (pakai template pertama)</option>
+                <option value="rotate">Rotate (urutan)</option>
+                <option value="random">Random (seeded)</option>
+              </select>
+            </div>
+            <div style="flex:1">
+              <label>Output folder</label>
+              <select id="folderMode">
+                <option value="flat">Flat (tanpa folder)</option>
+                <option value="csv">Gunakan kolom folder (CSV)</option>
+                <option value="linkpath">Gunakan path link (dir pertama)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div style="flex:1">
+              <label>Nama ZIP</label>
+              <input id="zipName" type="text" value="artikel-output.zip" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div style="flex:1">
+              <label><input id="chkStrict" type="checkbox" checked /> Strict integrity check</label>
+              <div class="small">Memastikan template tidak berubah selain placeholder.</div>
+            </div>
+            <div style="flex:1">
+              <label><input id="chkNameFromLink" type="checkbox" checked /> Nama file mengikuti LINK (fallback slug)</label>
+            </div>
+          </div>
+
+          <div class="row">
+            <div style="flex:1">
+              <label><input id="chkAutoRefresh" type="checkbox" checked /> Auto refresh setelah download</label>
+            </div>
+          </div>
+        </div>
+
+        <hr />
+        <div class="btns">
+          <button id="btnPreview" class="secondary">Preview</button>
+          <button id="btnGenerate">Generate ZIP</button>
+          <button id="btnLoadSample" class="secondary">Isi Contoh</button>
+          <button id="btnReset" class="danger">Reset</button>
+        </div>
+
+        <hr />
+        <div id="status" class="status">Upload template untuk memulai.</div>
+      </section>
+
+      <section class="card">
+        <h2>Report</h2>
+        <div class="kv" id="report"></div>
+        <hr />
+        <div class="small">
+          Output ZIP akan berisi:
+          <ul>
+            <li>file HTML hasil generate</li>
+            <li>opsional folder <code>images/</code> (jika upload gambar)</li>
+            <li><code>manifest.csv</code> (daftar output)</li>
+            <li><code>report.json</code> (ringkasan proses)</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <dialog id="modal">
+    <div class="row" style="justify-content:space-between; align-items:center; padding:14px 14px 0;">
+      <div class="pill">Preview: <code id="previewName">-</code></div>
+      <div class="btns"><button id="btnClose" class="secondary">Tutup</button></div>
+    </div>
+    <div style="padding:14px;">
+      <iframe id="previewFrame" title="preview"></iframe>
+    </div>
+  </dialog>
+
+  <script src="./app.js"></script>
+</body>
+</html>
