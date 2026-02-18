@@ -80,6 +80,16 @@
             <textarea id="titles" placeholder="1 judul per baris"></textarea>
           </div>
           <div class="field">
+            <label>Converter Anchor → LINK (ambil URL dari tag &lt;a&gt;)</label>
+            <textarea id="anchorInput" placeholder="Tempel list &lt;a href="..."&gt;teks&lt;/a&gt; di sini (1 anchor per baris)"></textarea>
+            <div class="actions" style="margin-top:10px;">
+              <button id="btnAnchorConvert" class="btn primary" type="button">Convert ke Box LINK</button>
+              <button id="btnAnchorClear" class="btn danger" type="button">Reset</button>
+            </div>
+            <div id="anchorStatus" class="status idle" style="margin-top:12px;">Tempel anchor HTML → klik Convert.</div>
+          </div>
+          
+          <div class="field">
             <label>LINK</label>
             <textarea id="links" placeholder="1 link per baris"></textarea>
           </div>

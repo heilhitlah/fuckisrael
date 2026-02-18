@@ -152,7 +152,11 @@ $("btnReset").addEventListener("click", ()=>{
   localStorage.removeItem("runa_img_ext");
   localStorage.removeItem("runa_img_count");
   if($("imgGenStatus")) { $("imgGenStatus").className = "status idle"; $("imgGenStatus").textContent = "Isi box → klik Generate."; }
-setStatus("idle", "Reset selesai.");
+  // reset anchor converter (if present on this page)
+  if($("anchorInput")) $("anchorInput").value = "";
+  if($("anchorStatus")) { $("anchorStatus").className = "status idle"; $("anchorStatus").textContent = "Tempel anchor HTML → klik Convert."; }
+
+  setStatus("idle", "Reset selesai.");
   report([]);
 });
 
@@ -531,6 +535,84 @@ $("btnClose").addEventListener("click", ()=>{
 
   loadSaved();
   setSt("idle", "Isi box → klik Generate.");
+})();
+
+
+// ---------------- Anchor <a> → LINK converter (Index) ----------------
+(function initAnchorConverter(){
+  const elIn = $("anchorInput");
+  const elLinks = $("links");
+  const btnConv = $("btnAnchorConvert");
+  const btnClr = $("btnAnchorClear");
+  const st = $("anchorStatus");
+
+  // If UI does not exist on this page, skip.
+  if(!elIn || !elLinks || !btnConv || !btnClr) return;
+
+  const setSt = (type, msg) => {
+    if(!st) return;
+    st.className = `status ${type}`;
+    st.textContent = msg;
+  };
+
+  const extractUrls = (text) => {
+    const out = [];
+    const seen = new Set();
+    const rows = String(text || "").split(/?
+/);
+
+    for(const rowRaw of rows){
+      const row = String(rowRaw || "").trim();
+      if(!row) continue;
+
+      let matched = false;
+      const reHref = /href\s*=\s*["']([^"']+)["']/gi;
+      let m;
+      while((m = reHref.exec(row))){
+        matched = true;
+        const url = String(m[1] || "").trim();
+        if(url && !seen.has(url)){
+          seen.add(url);
+          out.push(url);
+        }
+      }
+
+      // Fallback: if the line already looks like a URL, keep it.
+      if(!matched){
+        const urlMatch = row.match(/https?:\/\/\S+/i);
+        if(urlMatch){
+          const url = urlMatch[0].trim();
+          if(url && !seen.has(url)){
+            seen.add(url);
+            out.push(url);
+          }
+        }
+      }
+    }
+
+    return out;
+  };
+
+  const convert = () => {
+    const urls = extractUrls(elIn.value);
+    if(!urls.length){
+      setSt("bad", "ERROR: Tidak ada href/URL yang terdeteksi.");
+      return;
+    }
+    elLinks.value = urls.join("
+");
+    setSt("ok", `Sukses: ${urls.length} link masuk ke box LINK.`);
+  };
+
+  const clear = () => {
+    elIn.value = "";
+    setSt("idle", "Tempel anchor HTML → klik Convert.");
+  };
+
+  btnConv.addEventListener("click", convert);
+  btnClr.addEventListener("click", clear);
+
+  setSt("idle", "Tempel anchor HTML → klik Convert.");
 })();
 
 
