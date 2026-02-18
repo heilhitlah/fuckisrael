@@ -372,7 +372,9 @@ $("btnGenerate").addEventListener("click", async ()=>{
   }
 });
 
-$("btnPreview").addEventListener("click", ()=>{
+// Preview button is optional (some builds may not include it)
+const _btnPreview = $("btnPreview");
+if(_btnPreview) _btnPreview.addEventListener("click", ()=>{
   const v = validateBasics();
   if(!v.ok) return;
 
