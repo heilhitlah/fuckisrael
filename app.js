@@ -141,7 +141,18 @@ $("btnReset").addEventListener("click", ()=>{
   $("chkStrict").checked = true;
   $("chkNameFromLink").checked = true;
   $("chkAutoRefresh").checked = true;
-  setStatus("idle", "Reset selesai.");
+  
+  // reset image generator (if present on this page)
+  if($("imgDomain")) $("imgDomain").value = "";
+  if($("imgBaseName")) $("imgBaseName").value = "";
+  if($("imgExt")) $("imgExt").value = "";
+  if($("imgCount")) $("imgCount").value = "10";
+  localStorage.removeItem("runa_img_domain");
+  localStorage.removeItem("runa_img_base");
+  localStorage.removeItem("runa_img_ext");
+  localStorage.removeItem("runa_img_count");
+  if($("imgGenStatus")) { $("imgGenStatus").className = "status idle"; $("imgGenStatus").textContent = "Isi box → klik Generate."; }
+setStatus("idle", "Reset selesai.");
   report([]);
 });
 
@@ -394,6 +405,132 @@ $("btnClose").addEventListener("click", ()=>{
   }catch{}
   modal.close();
 });
+
+
+// ---------------- Image link generator (Index) ----------------
+(function initImageGenerator(){
+  const elDomain = $("imgDomain");
+  const elBase   = $("imgBaseName");
+  const elExt    = $("imgExt");
+  const elCount  = $("imgCount");
+  const elOut    = $("images"); // auto-fill target
+  const btnGen   = $("btnImgGenerate");
+  const btnCopy  = $("btnImgCopy");
+  const btnReset = $("btnImgReset");
+  const st       = $("imgGenStatus");
+
+  // If the UI doesn't exist on this page, skip.
+  if(!elDomain || !elBase || !elExt || !elCount || !elOut || !btnGen || !btnReset) return;
+
+  const KEY_DOMAIN = "runa_img_domain";
+  const KEY_BASE   = "runa_img_base";
+  const KEY_EXT    = "runa_img_ext";
+  const KEY_COUNT  = "runa_img_count";
+
+  const setSt = (type, msg) => {
+    if(!st) return;
+    st.className = `status ${type}`;
+    st.textContent = msg;
+  };
+
+  const ensureTrailingSlash = (url) => {
+    const u = String(url || "").trim();
+    if(!u) return "";
+    return u.endsWith("/") ? u : u + "/";
+  };
+
+  const normalizeExt = (ext) => {
+    let e = String(ext || "").trim();
+    if(!e) return "";
+    if(!e.startsWith(".")) e = "." + e;
+    return e;
+  };
+
+  const saveNow = () => {
+    localStorage.setItem(KEY_DOMAIN, elDomain.value || "");
+    localStorage.setItem(KEY_BASE, elBase.value || "");
+    localStorage.setItem(KEY_EXT, elExt.value || "");
+    localStorage.setItem(KEY_COUNT, elCount.value || "10");
+  };
+
+  const loadSaved = () => {
+    const d = localStorage.getItem(KEY_DOMAIN);
+    const b = localStorage.getItem(KEY_BASE);
+    const e = localStorage.getItem(KEY_EXT);
+    const c = localStorage.getItem(KEY_COUNT);
+
+    if(d) elDomain.value = d;
+    if(b) elBase.value = b;
+    if(e) elExt.value = e;
+    if(c && String(c).trim()) elCount.value = c;
+  };
+
+  const generate = () => {
+    const domain = ensureTrailingSlash(elDomain.value);
+    const base = String(elBase.value || "").trim();
+    const ext = normalizeExt(elExt.value);
+
+    if(!domain || !base || !ext){
+      setSt("bad", "ERROR: Domain/folder, nama file, dan format wajib diisi.");
+      return;
+    }
+
+    const count = Math.max(1, Math.min(5000, parseInt(elCount.value, 10) || 10));
+    elCount.value = String(count);
+
+    const out = [];
+    for(let i=1; i<=count; i++){
+      out.push(`${domain}${base}${i}${ext}`);
+    }
+
+    elOut.value = out.join("\n");
+    saveNow();
+    setSt("ok", `Sukses: ${out.length} link dibuat dan box GAMBAR terisi.`);
+  };
+
+  const reset = () => {
+    elDomain.value = "";
+    elBase.value = "";
+    elExt.value = "";
+    elCount.value = "10";
+    elOut.value = "";
+    localStorage.removeItem(KEY_DOMAIN);
+    localStorage.removeItem(KEY_BASE);
+    localStorage.removeItem(KEY_EXT);
+    localStorage.removeItem(KEY_COUNT);
+    setSt("idle", "Reset selesai.");
+  };
+
+  const copyOut = async () => {
+    const v = elOut.value || "";
+    if(!v){
+      setSt("warn", "Box GAMBAR masih kosong.");
+      return;
+    }
+    if(navigator.clipboard && typeof navigator.clipboard.writeText === "function"){
+      await navigator.clipboard.writeText(v);
+    } else {
+      elOut.focus();
+      elOut.select();
+      document.execCommand("copy");
+    }
+    setSt("ok", "Box GAMBAR dicopy ke clipboard.");
+  };
+
+  // autosave on input
+  elDomain.addEventListener("input", saveNow);
+  elBase.addEventListener("input", saveNow);
+  elExt.addEventListener("input", saveNow);
+  elCount.addEventListener("input", saveNow);
+
+  btnGen.addEventListener("click", generate);
+  btnReset.addEventListener("click", reset);
+  if(btnCopy) btnCopy.addEventListener("click", copyOut);
+
+  loadSaved();
+  setSt("idle", "Isi box → klik Generate.");
+})();
+
 
 // initial
 setStatus("idle", "Upload template untuk memulai.");

@@ -83,7 +83,44 @@
             <label>LINK</label>
             <textarea id="links" placeholder="1 link per baris"></textarea>
           </div>
+          
           <div class="field">
+            <label>Generator Link Gambar (otomatis isi box GAMBAR)</label>
+            <div class="help">Isi domain/folder + nama file + format + jumlah, lalu klik <strong>Generate</strong>. Hasil akan otomatis masuk ke box <strong>GAMBAR</strong> di bawah.</div>
+
+            <div class="three" style="margin-top:10px;">
+              <div class="field">
+                <label>Domain / Folder</label>
+                <input id="imgDomain" placeholder="https://supernova-66.github.io/rose/" />
+                <div class="help">Pastikan diakhiri <code>/</code> (folder).</div>
+              </div>
+              <div class="field">
+                <label>Nama File (tanpa nomor)</label>
+                <input id="imgBaseName" placeholder="mahjongways-18feb26-3-" />
+                <div class="help">Nomor 1–N ditambahkan otomatis.</div>
+              </div>
+              <div class="field">
+                <label>Format</label>
+                <input id="imgExt" placeholder=".webp" />
+                <div class="help">Contoh: <code>.webp</code>, <code>.jpg</code>, <code>.png</code></div>
+              </div>
+              <div class="field">
+                <label>Jumlah Link</label>
+                <input id="imgCount" type="number" inputmode="numeric" min="1" max="5000" value="10" />
+                <div class="help">Contoh: 20, 50, 100, 300.</div>
+              </div>
+            </div>
+
+            <div class="actions" style="margin-top:10px;">
+              <button id="btnImgGenerate" class="btn primary" type="button">Generate</button>
+              <button id="btnImgCopy" class="btn" type="button">Copy ke Clipboard</button>
+              <button id="btnImgReset" class="btn danger" type="button">Reset</button>
+            </div>
+
+            <div id="imgGenStatus" class="status idle" style="margin-top:12px;">Isi box → klik Generate.</div>
+          </div>
+
+<div class="field">
             <label>GAMBAR</label>
             <textarea id="images" placeholder="1 gambar per baris"></textarea>
           </div>
