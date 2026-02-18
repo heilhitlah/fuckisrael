@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tools Link Gambar • RUNA</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">◎</div>
+        <div>
+          <h1>Tools Link Gambar</h1>
+          <p>Generate link dari judul + susun link gambar berurutan (1–10) langsung di browser.</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <a class="btn ghost" href="./index.html" style="text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;">← Kembali ke Generator</a>
+      </div>
+    </header>
+
+    <main class="grid">
+
+      <section class="card">
+        <div class="card-head">
+          <h2>1) Link dari Judul</h2>
+          <span class="pill">Slug 50</span>
+        </div>
+
+        <div class="two" style="gap:12px;">
+          <div class="field">
+            <label>Domain (fleksibel)</label>
+            <input id="linkDomain" placeholder="https://domain.com/" />
+            <div class="help">Boleh pakai folder. Otomatis diberi <code>/</code> jika belum ada.</div>
+          </div>
+          <div class="field">
+            <label>Daftar Judul (1 baris = 1 judul)</label>
+            <textarea id="linkTitles" placeholder="Tempel daftar judul di sini"></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnGenLinks" class="btn primary" type="button">Generate Daftar Link</button>
+          <button id="btnGenAnchors" class="btn" type="button">Generate Anchor Text</button>
+          <button id="btnResetLinks" class="btn danger" type="button">Reset</button>
+        </div>
+
+        <div id="linkStatus" class="status idle" style="margin-top:12px;">Isi domain + judul → generate.</div>
+        <div class="help" id="kwHint" style="margin-top:10px;"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>2) Output Link &amp; Anchor</h2>
+          <span class="pill">Copy</span>
+        </div>
+
+        <div class="two" style="gap:12px;">
+          <div class="field">
+            <label>Daftar Link (.html)</label>
+            <textarea id="outLinks" placeholder="Hasil link akan muncul di sini"></textarea>
+            <div class="actions" style="margin-top:8px;">
+              <button class="btn" id="btnCopyLinks" type="button">Copy Link</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Daftar Anchor</label>
+            <textarea id="outAnchors" placeholder="Hasil anchor akan muncul di sini"></textarea>
+            <div class="actions" style="margin-top:8px;">
+              <button class="btn" id="btnCopyAnchors" type="button">Copy Anchor</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>3) Link Gambar</h2>
+          <span class="pill">3 Box</span>
+        </div>
+
+        <div class="three">
+          <div class="field">
+            <label>Box 1: Domain / Folder</label>
+            <input id="imgDomain" placeholder="https://gomoonchild.github.io/berita/" />
+            <div class="help">Pastikan diakhiri <code>/</code> (folder).</div>
+          </div>
+          <div class="field">
+            <label>Box 2: Nama File (tanpa nomor)</label>
+            <input id="imgBaseName" placeholder="mahjongways-gameko" />
+            <div class="help">Nomor 1–10 akan ditambahkan otomatis.</div>
+          </div>
+          <div class="field">
+            <label>Box 3: Format</label>
+            <input id="imgExt" placeholder=".webp" />
+            <div class="help">Contoh: <code>.webp</code>, <code>.jpg</code>, <code>.png</code></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnGenerate" class="btn primary" type="button">Generate 10 Link</button>
+          <button id="btnReset" class="btn danger" type="button">Reset</button>
+        </div>
+
+        <div id="imgStatus" class="status idle" style="margin-top:12px;">Isi 3 box → klik Generate.</div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>4) Output Gambar</h2>
+          <span class="pill">Copy</span>
+        </div>
+
+        <div class="field">
+          <label>Hasil Link Gambar (10 baris)</label>
+          <textarea id="out" placeholder="Hasil akan muncul di sini"></textarea>
+          <div class="actions" style="margin-top:8px;">
+            <button class="btn" id="btnCopy" type="button">Copy Hasil</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card full">
+        <div class="card-head">
+          <h2>Tips</h2>
+          <span class="pill">Praktis</span>
+        </div>
+        <details class="tips" open>
+          <summary>Cara pakai cepat</summary>
+          <ul>
+            <li>Bagian <strong>Link dari Judul</strong>: masukkan domain + daftar judul, klik <strong>Generate Daftar Link</strong>, lalu (opsional) klik <strong>Generate Anchor Text</strong>.</li>
+            <li>Isi 3 box → klik <strong>Generate 10 Link</strong>.</li>
+            <li>Gunakan tombol <strong>Copy Hasil</strong> untuk menyalin 10 link sekaligus.</li>
+          </ul>
+        </details>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>100% di browser • Tidak mengirim data ke server</span>
+    </footer>
+  </div>
+
+  <script src="./image.js"></script>
+</body>
+</html>
