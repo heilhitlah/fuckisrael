@@ -151,6 +151,7 @@ $("btnReset").addEventListener("click", ()=>{
   localStorage.removeItem("runa_img_base");
   localStorage.removeItem("runa_img_ext");
   localStorage.removeItem("runa_img_count");
+  localStorage.removeItem("runa_img_out");
   if($("imgGenStatus")) { $("imgGenStatus").className = "status idle"; $("imgGenStatus").textContent = "Isi box → klik Generate."; }
   // reset anchor converter (if present on this page)
   if($("anchorInput")) $("anchorInput").value = "";
@@ -432,6 +433,7 @@ $("btnClose").addEventListener("click", ()=>{
   const KEY_BASE   = "runa_img_base";
   const KEY_EXT    = "runa_img_ext";
   const KEY_COUNT  = "runa_img_count";
+  const KEY_OUT    = "runa_img_out";
 
   const setSt = (type, msg) => {
     if(!st) return;
@@ -457,6 +459,7 @@ $("btnClose").addEventListener("click", ()=>{
     localStorage.setItem(KEY_BASE, elBase.value || "");
     localStorage.setItem(KEY_EXT, elExt.value || "");
     localStorage.setItem(KEY_COUNT, elCount.value || "10");
+    localStorage.setItem(KEY_OUT, elOut.value || "");
   };
 
   const loadSaved = () => {
@@ -464,11 +467,13 @@ $("btnClose").addEventListener("click", ()=>{
     const b = localStorage.getItem(KEY_BASE);
     const e = localStorage.getItem(KEY_EXT);
     const c = localStorage.getItem(KEY_COUNT);
+    const o = localStorage.getItem(KEY_OUT);
 
     if(d) elDomain.value = d;
     if(b) elBase.value = b;
     if(e) elExt.value = e;
     if(c && String(c).trim()) elCount.value = c;
+    if(o) elOut.value = o;
   };
 
   const generate = () => {
@@ -504,6 +509,7 @@ $("btnClose").addEventListener("click", ()=>{
     localStorage.removeItem(KEY_BASE);
     localStorage.removeItem(KEY_EXT);
     localStorage.removeItem(KEY_COUNT);
+    localStorage.removeItem(KEY_OUT);
     setSt("idle", "Reset selesai.");
   };
 
@@ -528,6 +534,7 @@ $("btnClose").addEventListener("click", ()=>{
   elBase.addEventListener("input", saveNow);
   elExt.addEventListener("input", saveNow);
   elCount.addEventListener("input", saveNow);
+  elOut.addEventListener("input", saveNow);
 
   btnGen.addEventListener("click", generate);
   btnReset.addEventListener("click", reset);
@@ -558,13 +565,16 @@ $("btnClose").addEventListener("click", ()=>{
   const extractUrls = (text) => {
     const out = [];
     const seen = new Set();
-    const rows = String(text || "").split(/?
+
+    const rows = String(text || "").split(/
+?
 /);
 
     for(const rowRaw of rows){
       const row = String(rowRaw || "").trim();
       if(!row) continue;
 
+      // Extract all href="..." occurrences per line
       let matched = false;
       const reHref = /href\s*=\s*["']([^"']+)["']/gi;
       let m;
@@ -614,6 +624,7 @@ $("btnClose").addEventListener("click", ()=>{
 
   setSt("idle", "Tempel anchor HTML → klik Convert.");
 })();
+
 
 
 // initial
