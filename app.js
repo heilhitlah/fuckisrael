@@ -250,6 +250,94 @@ function validateBasics(){
   return { ok:true, phTitle, phLink, phImg, phArticle, arrTitle, arrLink, arrImg, arrArticle, n };
 }
 
+
+function qualityGate(payload){
+  const { arrTitle, arrLink, arrImg, n } = payload;
+  const warnings = [];
+  const errors = [];
+
+  const isLikelyUrl = (u)=>/^https?:\/\/|^\//i.test(u) || /^[a-z0-9\-_.]+\/[^\s]+$/i.test(u);
+  const hasScheme = (u)=>/^https?:\/\//i.test(u);
+
+  // Empty/whitespace (should already be prevented by lines(), but keep safe)
+  for(let i=0;i<n;i++){
+    if(!String(arrTitle[i]||"").trim()) errors.push({type:"judul_kosong", i, value:arrTitle[i]});
+    if(!String(arrLink[i]||"").trim())  errors.push({type:"link_kosong", i, value:arrLink[i]});
+    if(!String(arrImg[i]||"").trim())   errors.push({type:"gambar_kosong", i, value:arrImg[i]});
+  }
+
+  // URL format checks (warnings)
+  const badLinks = [];
+  const badImgs = [];
+  const noSchemeLinks = [];
+  for(let i=0;i<n;i++){
+    const link = String(arrLink[i]||"").trim();
+    const img  = String(arrImg[i]||"").trim();
+    if(link && !isLikelyUrl(link)) badLinks.push({i, v:link});
+    if(link && isLikelyUrl(link) && !hasScheme(link) && !link.startsWith("/")) noSchemeLinks.push({i, v:link});
+    if(img && !isLikelyUrl(img)) badImgs.push({i, v:img});
+  }
+  if(badLinks.length){
+    warnings.push({
+      k:"Quality Gate: LINK format",
+      v:`Ada <code>${badLinks.length}</code> link yang formatnya tidak terlihat seperti URL. Contoh: <code>${escapeHtml(badLinks[0].v)}</code> (baris #${badLinks[0].i+1}).`
+    });
+  }
+  if(noSchemeLinks.length){
+    warnings.push({
+      k:"Quality Gate: LINK tanpa http/https",
+      v:`Ada <code>${noSchemeLinks.length}</code> link tanpa skema <code>http/https</code>. Jika ini memang relative, abaikan. Contoh: <code>${escapeHtml(noSchemeLinks[0].v)}</code> (baris #${noSchemeLinks[0].i+1}).`
+    });
+  }
+  if(badImgs.length){
+    warnings.push({
+      k:"Quality Gate: GAMBAR format",
+      v:`Ada <code>${badImgs.length}</code> gambar yang formatnya tidak terlihat seperti URL/path. Contoh: <code>${escapeHtml(badImgs[0].v)}</code> (baris #${badImgs[0].i+1}).`
+    });
+  }
+
+  // Duplicate checks (warnings)
+  const dup = (arr)=> {
+    const map=new Map(); const d=[];
+    arr.forEach((x,idx)=>{
+      const k=String(x||"").trim();
+      if(!k) return;
+      if(map.has(k)) d.push({v:k, first:map.get(k), i:idx});
+      else map.set(k, idx);
+    });
+    return d;
+  };
+  const dupLinks = dup(arrLink);
+  const dupImgs  = dup(arrImg);
+  if(dupLinks.length){
+    warnings.push({
+      k:"Quality Gate: LINK duplikat",
+      v:`Ditemukan <code>${dupLinks.length}</code> duplikasi link. Contoh: <code>${escapeHtml(dupLinks[0].v)}</code> (baris #${dupLinks[0].first+1} & #${dupLinks[0].i+1}).`
+    });
+  }
+  if(dupImgs.length){
+    warnings.push({
+      k:"Quality Gate: GAMBAR duplikat",
+      v:`Ditemukan <code>${dupImgs.length}</code> duplikasi gambar. Contoh: <code>${escapeHtml(dupImgs[0].v)}</code> (baris #${dupImgs[0].first+1} & #${dupImgs[0].i+1}).`
+    });
+  }
+
+  // Title length heuristic (warnings)
+  const longTitles = [];
+  for(let i=0;i<n;i++){
+    const t=String(arrTitle[i]||"");
+    if(t.length>120) longTitles.push({i, v:t});
+  }
+  if(longTitles.length){
+    warnings.push({
+      k:"Quality Gate: Judul terlalu panjang",
+      v:`Ada <code>${longTitles.length}</code> judul > 120 karakter. Contoh (baris #${longTitles[0].i+1}): <code>${escapeHtml(longTitles[0].v.slice(0,140))}${longTitles[0].v.length>140?"…":""}</code>`
+    });
+  }
+
+  return { warnings, errors };
+}
+
 function buildOutputs(payload){
   const { phTitle, phLink, phImg, phArticle, arrTitle, arrLink, arrImg, arrArticle, n } = payload;
   const strict = $("chkStrict").checked;
@@ -299,6 +387,23 @@ $("btnGenerate").addEventListener("click", async ()=>{
     if(!v.ok){
       $("btnGenerate").disabled = false;
       return;
+    }
+
+    const qg = qualityGate(v);
+    if(qg.errors.length){
+      setStatus("bad", `ERROR: Quality Gate gagal — ada ${qg.errors.length} field kosong di data.`);
+      // tampilkan sampai 6 contoh error
+      const ex = qg.errors.slice(0,6).map(e=>`#${e.i+1}`).join(", ");
+      report([
+        {k:"Quality Gate", v:`Field kosong terdeteksi pada baris: <code>${ex}${qg.errors.length>6?"…":""}</code>`},
+        {k:"Catatan", v:`Pastikan setiap baris memiliki <strong>Judul</strong>, <strong>Link</strong>, dan <strong>Gambar</strong>. Baris kosong sebaiknya dihapus.`}
+      ]);
+      $("btnGenerate").disabled = false;
+      return;
+    }
+    if(qg.warnings.length){
+      setStatus("warn", `Quality Gate: ada ${qg.warnings.length} warning — proses tetap dilanjutkan.`);
+      report(qg.warnings);
     }
 
     const { outputs, integrityErrors } = buildOutputs(v);
@@ -355,7 +460,8 @@ $("btnGenerate").addEventListener("click", async ()=>{
     report([
       {k:"Output", v:`${outputs.length} file HTML`},
       {k:"ZIP", v:`<code>${escapeHtml(zipName)}</code>`},
-      {k:"Nama file", v:`${$("chkNameFromLink").checked ? "Mengikuti LINK" : "Default artikel.html (dedup otomatis)"}`}
+      {k:"Nama file", v:`${$("chkNameFromLink").checked ? "Mengikuti LINK" : "Default artikel.html (dedup otomatis)"}`},
+      ...(typeof qg !== "undefined" && qg.warnings && qg.warnings.length ? [{k:"Quality Gate", v:`Warning=<code>${qg.warnings.length}</code> (lihat report di atas)`}] : [])
     ]);
 
     const blob = await zip.generateAsync({type:"blob"});
