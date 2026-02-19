@@ -5,6 +5,23 @@ let templateText = "";
 let templateName = "";
 let articleRawText = "";
 let uploadedImages = [];
+let lockedImages = [];
+
+function isImgLockOn(){
+  const el = $("chkImgLock");
+  return el ? !!el.checked : true;
+}
+
+function setImgUploadInfo(){
+  const info = $("imgUploadInfo");
+  if(!info) return;
+  const n = lockedImages.length;
+  if(n){
+    info.innerHTML = `Gambar terkunci: <strong>${n}</strong> file. (Upload template tidak akan menghapusnya)`;
+  }else{
+    info.textContent = "Belum ada gambar yang dikunci.";
+  }
+}
 
 function setStatus(type, msg){
   const el = $("status");
@@ -100,7 +117,12 @@ async function loadTemplate(file){
   templateText = await file.text();
   templateName = file.name || "template.html";
   $("tplMeta").textContent = `${templateName} • ${templateText.length.toLocaleString()} karakter`;
-  setStatus("ok", "Template dimuat. Silakan isi data.");
+  // Jangan menimpa state gambar yang sudah diupload (drag lock mode)
+  if(lockedImages.length && isImgLockOn()){
+    setStatus("ok", `Template dimuat. Gambar tetap terkunci (${lockedImages.length} file).`);
+  }else{
+    setStatus("ok", "Template dimuat. Silakan isi data.");
+  }
   report([{k:"Template loaded", v:`<code>${escapeHtml(templateName)}</code>`}]);
 }
 
@@ -133,6 +155,8 @@ $("btnReset").addEventListener("click", ()=>{
   $("articleFile").value = "";
   $("imageFiles").value = "";
   uploadedImages = [];
+  lockedImages = [];
+  setImgUploadInfo();
   $("zipName").value = "artikel-output.zip";
   $("phTitle").value = "*JUDUL*";
   $("phLink").value = "*LINK*";
@@ -185,12 +209,36 @@ $("articleFile").addEventListener("change", async (e)=>{
 
 // load images (optional)
 $("imageFiles").addEventListener("change", (e)=>{
-  uploadedImages = Array.from(e.target.files || []);
-  if(uploadedImages.length){
-    setStatus("ok", `Gambar dipilih: ${uploadedImages.length} file`);
-    report([{k:"Images selected", v:`${uploadedImages.length} file (akan di-rename mengikuti daftar GAMBAR)`}]);
+  const picked = Array.from(e.target.files || []);
+  uploadedImages = picked;
+  if(isImgLockOn()){
+    // Drag lock mode: simpan referensi File di memori agar tidak hilang saat template di-upload
+    lockedImages = picked;
   }
+  if(picked.length){
+    setStatus("ok", isImgLockOn()
+      ? `Gambar dikunci: ${picked.length} file`
+      : `Gambar dipilih: ${picked.length} file`);
+    report([{k:"Images selected", v:`${picked.length} file (akan di-rename mengikuti daftar GAMBAR)`}]);
+  }else{
+    if(isImgLockOn()) lockedImages = [];
+  }
+  setImgUploadInfo();
 });
+
+// Inisialisasi label lock info
+setImgUploadInfo();
+
+// Jika lock dimatikan/dihidupkan, update label dan (jika lock dinyalakan) salin state upload terakhir
+const _lock = $("chkImgLock");
+if(_lock){
+  _lock.addEventListener("change", ()=>{
+    if(isImgLockOn() && uploadedImages.length){
+      lockedImages = uploadedImages.slice();
+    }
+    setImgUploadInfo();
+  });
+}
 
 function validateBasics(){
   if(!templateText){
@@ -222,9 +270,10 @@ function validateBasics(){
   const arrArticle = parseArticleBlocks($("articles").value);
   const n = Math.max(arrTitle.length, arrLink.length, arrImg.length);
 
-  if(uploadedImages.length && uploadedImages.length !== n){
-    setStatus("bad", `ERROR: Jumlah file gambar yang di-upload tidak sama. Upload=${uploadedImages.length}, Baris=${n}.`);
-    report([{k:"Upload gambar", v:`Upload=<code>${uploadedImages.length}</code>, Baris=<code>${n}</code>. Samakan jumlahnya agar rename sesuai daftar GAMBAR.`}]);
+  const effectiveUploads = (isImgLockOn() && lockedImages.length) ? lockedImages : uploadedImages;
+  if(effectiveUploads.length && effectiveUploads.length !== n){
+    setStatus("bad", `ERROR: Jumlah file gambar yang di-upload tidak sama. Upload=${effectiveUploads.length}, Baris=${n}.`);
+    report([{k:"Upload gambar", v:`Upload=<code>${effectiveUploads.length}</code>, Baris=<code>${n}</code>. Samakan jumlahnya agar rename sesuai daftar GAMBAR.`}]);
     return { ok:false };
   }
 
@@ -427,7 +476,7 @@ $("btnGenerate").addEventListener("click", async ()=>{
     }
 
     // Optional: add images into ZIP and rename based on daftar GAMBAR
-    const imgFiles = uploadedImages || [];
+    const imgFiles = ((isImgLockOn() && lockedImages.length) ? lockedImages : uploadedImages) || [];
     if(imgFiles.length){
       const imgFolder = zip.folder("images");
       const desired = v.arrImg; // already trimmed & filtered
