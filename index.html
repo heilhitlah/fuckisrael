@@ -78,6 +78,41 @@
             <label>JUDUL</label>
             <textarea id="titles" placeholder="1 judul per baris"></textarea>
           </div>
+
+          <div class="field">
+            <label>Converter JUDUL → AnchorText (buat &lt;a href=&quot;domain/slug.html&quot;&gt;anchortext&lt;/a&gt;)</label>
+            <div class="help">Slug dibuat dari <strong>awal judul ~50 karakter</strong> (huruf kecil), tanpa tanda baca (kecuali <code>-</code> sebagai pemisah), dan <strong>tidak memotong kata</strong>. Output otomatis masuk ke box <strong>ANCHOR</strong> di bawah (1 anchor per baris).</div>
+
+            <div class="three" style="margin-top:10px;">
+              <div class="field">
+                <label>Domain</label>
+                <input id="taDomain" placeholder="https://www.pta-banten.go.id/berita/" />
+                <div class="help">Boleh tanpa <code>/</code> di akhir — nanti dibetulkan otomatis.</div>
+              </div>
+              <div class="field">
+                <label>Anchor Text</label>
+                <input id="taText" placeholder="mahjongways kasino online" />
+                <div class="help">Teks klik yang tampil di antara tag <code>&lt;a&gt;</code>.</div>
+              </div>
+              <div class="field">
+                <label>Batas slug (karakter)</label>
+                <input id="taLimit" type="number" inputmode="numeric" min="20" max="120" value="50" />
+                <div class="help">Default 50. Sistem akan menambah sedikit agar kata terakhir tidak kepotong.</div>
+              </div>
+              <div class="field">
+                <label>Toleransi (karakter)</label>
+                <input id="taTolerance" type="number" inputmode="numeric" min="0" max="30" value="8" />
+                <div class="help">Tambahan maksimum di atas batas, supaya kata terakhir utuh.</div>
+              </div>
+            </div>
+
+            <div class="actions" style="margin-top:10px;">
+              <button id="btnTitleToAnchor" class="btn primary" type="button">Convert Judul → Anchor</button>
+              <button id="btnTitleToAnchorClear" class="btn danger" type="button">Reset</button>
+            </div>
+            <div id="titleAnchorStatus" class="status idle" style="margin-top:12px;">Isi JUDUL + Domain + Anchor Text → klik Convert.</div>
+          </div>
+
           <div class="field">
             <label>Converter Anchor → LINK (ambil URL dari tag &lt;a&gt;)</label>
             <textarea id="anchorInput" placeholder="Tempel list &lt;a href=&quot;...&quot;&gt;teks&lt;/a&gt; di sini (1 anchor per baris)"></textarea>

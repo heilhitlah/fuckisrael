@@ -778,6 +778,130 @@ $("btnClose").addEventListener("click", ()=>{
 })();
 
 
+// ---------------- JUDUL → AnchorText converter (Index) ----------------
+(function initTitleToAnchor(){
+  const elTitles = $("titles");
+  const elOut = $("anchorInput");
+  const elDomain = $("taDomain");
+  const elText = $("taText");
+  const elLimit = $("taLimit");
+  const elTol = $("taTolerance");
+  const btnConv = $("btnTitleToAnchor");
+  const btnClr = $("btnTitleToAnchorClear");
+  const st = $("titleAnchorStatus");
+
+  // If UI does not exist on this page, skip.
+  if(!elTitles || !elOut || !elDomain || !elText || !btnConv || !btnClr) return;
+
+  const setSt = (type, msg) => {
+    if(!st) return;
+    st.className = `status ${type}`;
+    st.textContent = msg;
+  };
+
+  const normalizeDomain = (d) => {
+    const raw = String(d || "").trim();
+    if(!raw) return "";
+    return raw.endsWith("/") ? raw : (raw + "/");
+  };
+
+  // slug rules:
+  // - lowercase
+  // - remove punctuation/symbols (keep letters+numbers+spaces)
+  // - spaces -> '-'
+  // - take ~limit chars from start but do NOT cut a word
+  // - allow tolerance extra chars to keep last word intact
+  const makeSlug = (title, limit = 50, tolerance = 8) => {
+    // remove diacritics
+    const t0 = String(title || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+
+    // keep only a-z 0-9 and spaces; everything else -> space
+    const cleaned = t0
+      .replace(/[^a-z0-9\s]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if(!cleaned) return "artikel.html";
+
+    const words = cleaned.split(" ").filter(Boolean);
+    const hardMax = Math.max(10, Number(limit) + Math.max(0, Number(tolerance)));
+    const softMax = Math.max(10, Number(limit));
+
+    const parts = [];
+    let len = 0;
+
+    for(const w of words){
+      const addLen = (parts.length ? 1 : 0) + w.length; // +1 for '-'
+      const nextLen = len + addLen;
+
+      if(nextLen <= softMax){
+        parts.push(w);
+        len = nextLen;
+        continue;
+      }
+
+      // would exceed soft limit; allow if still within hard limit
+      if(nextLen <= hardMax){
+        parts.push(w);
+        len = nextLen;
+      }
+      break;
+    }
+
+    const slugCore = parts.join("-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    return (slugCore || "artikel") + ".html";
+  };
+
+  const convert = () => {
+    const domain = normalizeDomain(elDomain.value);
+    const aText = String(elText.value || "");
+    const titles = String(elTitles.value || "")
+      .split(/\r?\n/)
+      .map(s => String(s || "").trim())
+      .filter(Boolean);
+
+    const limit = Number(elLimit?.value ?? 50);
+    const tol = Number(elTol?.value ?? 8);
+
+    if(!titles.length){
+      setSt("bad", "ERROR: Box JUDUL masih kosong.");
+      return;
+    }
+    if(!domain || !/^https?:\/\//i.test(domain)){
+      setSt("bad", "ERROR: Domain wajib valid (contoh: https://domain.com/folder/). ");
+      return;
+    }
+    if(!aText.trim()){
+      setSt("bad", "ERROR: Anchor Text masih kosong.");
+      return;
+    }
+
+    const lines = titles.map((t) => {
+      const slug = makeSlug(t, limit, tol);
+      return `<a href="${domain}${slug}">${aText}</a>`;
+    });
+
+    elOut.value = lines.join("\n");
+    setSt("ok", `Sukses: ${lines.length} anchor dibuat dan masuk ke box ANCHOR.`);
+  };
+
+  const clear = () => {
+    if(elDomain) elDomain.value = "";
+    if(elText) elText.value = "";
+    if(elLimit) elLimit.value = "50";
+    if(elTol) elTol.value = "8";
+    setSt("idle", "Isi JUDUL + Domain + Anchor Text → klik Convert.");
+  };
+
+  btnConv.addEventListener("click", convert);
+  btnClr.addEventListener("click", clear);
+  setSt("idle", "Isi JUDUL + Domain + Anchor Text → klik Convert.");
+})();
+
+
 
 // initial
 setStatus("idle", "Upload template untuk memulai.");
