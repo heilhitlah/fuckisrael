@@ -562,13 +562,12 @@ $("btnClose").addEventListener("click", ()=>{
     st.textContent = msg;
   };
 
+  // Extract URLs from <a ... href="...">...</a> lines (or plain URLs)
   const extractUrls = (text) => {
     const out = [];
     const seen = new Set();
 
-    const rows = String(text || "").split(/
-?
-/);
+    const rows = String(text || "").split(/\r?\n/);
 
     for(const rowRaw of rows){
       const row = String(rowRaw || "").trim();
@@ -587,11 +586,11 @@ $("btnClose").addEventListener("click", ()=>{
         }
       }
 
-      // Fallback: if the line already looks like a URL, keep it.
+      // Fallback: if the line already contains a URL, keep it.
       if(!matched){
         const urlMatch = row.match(/https?:\/\/\S+/i);
         if(urlMatch){
-          const url = urlMatch[0].trim();
+          const url = urlMatch[0].trim().replace(/[),.;]+$/, ""); // trim common trailing punctuation
           if(url && !seen.has(url)){
             seen.add(url);
             out.push(url);
@@ -599,7 +598,6 @@ $("btnClose").addEventListener("click", ()=>{
         }
       }
     }
-
     return out;
   };
 
@@ -609,8 +607,7 @@ $("btnClose").addEventListener("click", ()=>{
       setSt("bad", "ERROR: Tidak ada href/URL yang terdeteksi.");
       return;
     }
-    elLinks.value = urls.join("
-");
+    elLinks.value = urls.join("\n");
     setSt("ok", `Sukses: ${urls.length} link masuk ke box LINK.`);
   };
 
