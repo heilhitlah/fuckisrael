@@ -39,12 +39,12 @@ body{
   margin-top:14px;
   border-radius:14px;
   overflow:hidden;
-  max-height:260px;   /* ⬅ atur tinggi hero di sini */
+  max-height:130px;   /* ⬅ atur tinggi hero di sini */
 }
 
 .hero-image img{
   width:100%;
-  height:260px;       /* samakan dengan max-height */
+  height:130px;       /* samakan dengan max-height */
   object-fit:cover;   /* crop otomatis biar nggak gepeng */
   display:block;
 }
