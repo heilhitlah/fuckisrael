@@ -37,21 +37,15 @@ body{
 
 .hero-image{
   margin-top:14px;
-  border-radius:16px;
+  border-radius:14px;
   overflow:hidden;
-  position:relative;
-}
-
-.hero-image::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(to top, rgba(0,0,0,.45), transparent);
+  max-height:260px;   /* ⬅ atur tinggi hero di sini */
 }
 
 .hero-image img{
   width:100%;
-  height:auto;
+  height:260px;       /* samakan dengan max-height */
+  object-fit:cover;   /* crop otomatis biar nggak gepeng */
   display:block;
 }
 
