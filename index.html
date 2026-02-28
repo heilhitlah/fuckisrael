@@ -54,19 +54,19 @@
 
         <div class="three">
           <div class="field">
-            <label>Placeholder Judul</label>
+            <label>Judul</label>
             <input id="phTitle" value="*JUDUL*" />
           </div>
           <div class="field">
-            <label>Placeholder Link</label>
+            <label>Link</label>
             <input id="phLink" value="*LINK*" />
           </div>
           <div class="field">
-            <label>Placeholder Gambar</label>
+            <label>Gambar</label>
             <input id="phImg" value="*GAMBAR*" />
           </div>
           <div class="field">
-            <label>Placeholder Artikel</label>
+            <label>Artikel</label>
             <input id="phArticle" value="*ARTIKEL*" />
           </div>
         </div>
@@ -86,28 +86,23 @@
 
           <div class="field">
             <label>Converter JUDUL → AnchorText (buat &lt;a href=&quot;domain/slug.html&quot;&gt;anchortext&lt;/a&gt;)</label>
-            <div class="help">Slug dibuat dari <strong>awal judul ~50 karakter</strong> (huruf kecil), tanpa tanda baca (kecuali <code>-</code> sebagai pemisah), dan <strong>tidak memotong kata</strong>. Output otomatis masuk ke box <strong>ANCHOR</strong> di bawah (1 anchor per baris).</div>
 
             <div class="three" style="margin-top:10px;">
               <div class="field">
                 <label>Domain</label>
                 <input id="taDomain" placeholder="https://www.pta-banten.go.id/berita/" />
-                <div class="help">Boleh tanpa <code>/</code> di akhir — nanti dibetulkan otomatis.</div>
               </div>
               <div class="field">
                 <label>Anchor Text</label>
                 <input id="taText" placeholder="mahjongways kasino online" />
-                <div class="help">Teks klik yang tampil di antara tag <code>&lt;a&gt;</code>.</div>
               </div>
               <div class="field">
                 <label>Batas slug (karakter)</label>
                 <input id="taLimit" type="number" inputmode="numeric" min="20" max="120" value="50" />
-                <div class="help">Default 50. Sistem akan menambah sedikit agar kata terakhir tidak kepotong.</div>
               </div>
               <div class="field">
                 <label>Toleransi (karakter)</label>
                 <input id="taTolerance" type="number" inputmode="numeric" min="0" max="30" value="8" />
-                <div class="help">Tambahan maksimum di atas batas, supaya kata terakhir utuh.</div>
               </div>
             </div>
 
@@ -135,28 +130,22 @@
           
           <div class="field">
             <label>Generator Link Gambar (otomatis isi box GAMBAR)</label>
-            <div class="help">Isi domain/folder + nama file + format + jumlah, lalu klik <strong>Generate</strong>. Hasil akan otomatis masuk ke box <strong>GAMBAR</strong> di bawah.</div>
-
             <div class="three" style="margin-top:10px;">
               <div class="field">
                 <label>Domain / Folder</label>
                 <input id="imgDomain" placeholder="https://supernova-66.github.io/rose/" />
-                <div class="help">Pastikan diakhiri <code>/</code> (folder).</div>
               </div>
               <div class="field">
                 <label>Nama File (tanpa nomor)</label>
                 <input id="imgBaseName" placeholder="mahjongways-18feb26-3-" />
-                <div class="help">Nomor 1–N ditambahkan otomatis.</div>
               </div>
               <div class="field">
                 <label>Format</label>
                 <input id="imgExt" placeholder=".webp" />
-                <div class="help">Contoh: <code>.webp</code>, <code>.jpg</code>, <code>.png</code></div>
               </div>
               <div class="field">
                 <label>Jumlah Link</label>
                 <input id="imgCount" type="number" inputmode="numeric" min="1" max="5000" value="10" />
-                <div class="help">Contoh: 20, 50, 100, 300.</div>
               </div>
             </div>
 
@@ -178,7 +167,6 @@
             <label>ARTIKEL (blok panjang)</label>
             <textarea id="articles" placeholder="Tempel artikel di sini (pakai marker -###- dan -$$$-) atau upload file di bawah"></textarea>
             <input id="articleFile" type="file" accept=".txt,.md,.html,.htm,text/plain,text/markdown,text/html" />
-            <div class="help">Upload <code>artikel.txt</code> berisi banyak blok artikel. Mapping berdasarkan urutan (blok #1 untuk judul baris #1, dst).</div>
           </div>
 
         <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload template">
